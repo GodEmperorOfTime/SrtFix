@@ -26,6 +26,7 @@ public class Subtitles : IReadOnlyCollection<SubtitleNr>
 
 public record SubtitleNr(int Nr, Timing Timing, ImmutableList<string> Text)
 {
+  public Subtitle WithoutNr => new (Timing, Text);
   public static SubtitleNr Default { get; } = new(0, Timing.Default, []);
 }
 
@@ -34,4 +35,7 @@ public record Subtitle(Timing Timing, ImmutableList<string> Text);
 public record Timing(TimeSpan Start, TimeSpan End)
 {
   public static Timing Default { get; } = new(TimeSpan.Zero, TimeSpan.Zero);
+
+  public Timing Add(TimeSpan value) => new(Start + value, End + value);
+  public Timing Multiply(double value) => new(Start * value, End * value);
 }

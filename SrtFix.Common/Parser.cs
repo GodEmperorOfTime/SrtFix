@@ -22,7 +22,7 @@ public class Parser
     parser.Finish();
     return new(parser.Subtitles
       .OrderBy(s => s.Nr)
-      .Select(s => new Subtitle(s.Timing, s.Text)));
+      .Select(s => s.WithoutNr));
   }
 
   class Impl
