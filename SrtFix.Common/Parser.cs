@@ -1,102 +1,120 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
-using System.Threading.Tasks;
 
 namespace SrtFix.Common;
 
 public class Parser
 {
 
-  enum State
-  {
-    Number,
-    Timing,
-    Text,
-  }
-
   public static async Task<Subtitles> ParseAsync(string file, CancellationToken cancellation = default)
   {
-    using var stream = new StreamReader(file); //File.OpenText(file);
-    return await ParseAsync(stream, cancellation);
+    using var stream = new StreamReader(file); 
+    return await ParseAsync(stream, cancellation); // musi byt vyawaitovant
   }
+
   public static async Task<Subtitles> ParseAsync(StreamReader reader, CancellationToken cancellation = default)
   {
-    var items = ImmutableList<Subtitle>.Empty;
-    var subtitle = Subtitle.Default;
-    State state = State.Number;
+    var parser = new Impl();
     string? line;
-    int rowNr = 0;
     while ((line = await reader.ReadLineAsync(cancellation)) is not null)
     {
-      rowNr++;
+      parser.Next(line);
+    }
+    parser.Finish();
+    return new(parser.Subtitles);
+  }
+
+  class Impl
+  {
+
+    enum State
+    {
+      Number,
+      Timing,
+      Text,
+    }
+
+    public ImmutableList<Subtitle> Subtitles { get; private set; } = [];
+
+    State _state = State.Number;
+    int _lineNr = 0;
+    Subtitle _subtitle = Subtitle.Default;    
+
+    public void Next(string line)
+    {
+      _lineNr++;
       try
       {
-        state = state switch
+        _state = _state switch
         {
-          State.Number => Number(line, ref subtitle),
-          State.Timing => Timing(line, ref subtitle),
-          State.Text => Text(line, ref subtitle),
+          State.Number => Number(line),
+          State.Timing => Timing(line),
+          State.Text => Text(line),
           _ => throw new InvalidOperationException()
         };
       }
       catch (InnerParseException)
       {
-        throw new ParseException(rowNr);
+        throw new ParseException(_lineNr, line);
       }
-      items = AddIfNewSubtitle(items, state, rowNr, subtitle);
     }
-    items = AddIfNewSubtitle(items, state, rowNr, subtitle);
-    return new(items);
-  }
 
-  static ImmutableList<Subtitle> AddIfNewSubtitle(ImmutableList<Subtitle> items, State state, int rowNr, Subtitle subtitle)
-  {
-    return state == State.Number && rowNr >= 3 ? items.Add(subtitle) : items;
-  }
-
-
-  static State Number(string line, ref Subtitle subtitle)
-  {
-    if (int.TryParse(line, out var nr))
+    public void Finish()
     {
-      subtitle = subtitle with { Nr = nr };
-      return State.Timing;
+      if (_state == State.Text && _lineNr >= 3)
+      {
+        ZaraditSubtitle();
+      }
     }
-    else if (string.IsNullOrWhiteSpace(line))
-    {
-      return State.Number;
-    }
-    else
-    {
-      throw new InnerParseException();
-    }
-  }
 
-
-  static State Timing(string line, ref Subtitle subtitle)
-  {
-    if(TimingParser.TryParse(line, out var timing))
+    State Number(string line)
     {
-      subtitle = subtitle with { Timing = timing };
-      return State.Text;
+      if (int.TryParse(line, out var nr))
+      {
+        _subtitle = _subtitle with { Nr = nr };
+        return State.Timing;
+      }
+      else if (string.IsNullOrWhiteSpace(line))
+      {
+        return State.Number;
+      }
+      else
+      {
+        throw new InnerParseException();
+      }
     }
-    else
-    {
-      throw new InnerParseException();
-    }
-  }
 
-
-  static State Text(string line, ref Subtitle subtitle)
-  {
-    if(string.IsNullOrWhiteSpace(line))
+    State Timing(string line)
     {
-      return State.Number;
+      if (TimingParser.TryParse(line, out var timing))
+      {
+        _subtitle = _subtitle with { Timing = timing };
+        return State.Text;
+      }
+      else
+      {
+        throw new InnerParseException();
+      }
     }
-    else
+
+    State Text(string line)
     {
-      subtitle = subtitle with { Text = subtitle.Text.Add(line.Trim()) };
-      return State.Text;
+      if (string.IsNullOrWhiteSpace(line))
+      {
+        ZaraditSubtitle();
+        return State.Number;
+      }
+      else
+      {
+        _subtitle = _subtitle with { Text = _subtitle.Text.Add(line.Trim()) };
+        return State.Text;
+      }
+    }
+
+    private void ZaraditSubtitle()
+    {
+      Subtitles = Subtitles.Add(_subtitle);
+      _subtitle = Subtitle.Default;
     }
   }
 
@@ -108,12 +126,14 @@ public class Parser
 
 public class ParseException : Exception
 {
-  public ParseException(int rowNr)
+  public ParseException(int rowNr, string line)
   {
     RowNr = rowNr;
+    Line = line;
   }
 
   public int RowNr { get; }
+  public string Line { get; }
 }
 
 public class Subtitles : IReadOnlyCollection<Subtitle>
