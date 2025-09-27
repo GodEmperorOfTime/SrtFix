@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 namespace SrtFix.Common;
 
@@ -21,7 +20,9 @@ public class Parser
       parser.Next(line);
     }
     parser.Finish();
-    return new(parser.Subtitles);
+    return new(parser.Subtitles
+      .OrderBy(s => s.Nr)
+      .Select(s => new Subtitle(s.Timing, s.Text)));
   }
 
   class Impl
@@ -34,11 +35,11 @@ public class Parser
       Text,
     }
 
-    public ImmutableList<Subtitle> Subtitles { get; private set; } = [];
+    public ImmutableList<SubtitleNr> Subtitles { get; private set; } = [];
 
     State _state = State.Number;
     int _lineNr = 0;
-    Subtitle _subtitle = Subtitle.Default;    
+    SubtitleNr _subtitle = SubtitleNr.Default;    
 
     public void Next(string line)
     {
@@ -114,7 +115,7 @@ public class Parser
     private void ZaraditSubtitle()
     {
       Subtitles = Subtitles.Add(_subtitle);
-      _subtitle = Subtitle.Default;
+      _subtitle = SubtitleNr.Default;
     }
   }
 
@@ -136,29 +137,3 @@ public class ParseException : Exception
   public string Line { get; }
 }
 
-public class Subtitles : IReadOnlyCollection<Subtitle>
-{
-
-  readonly ImmutableList<Subtitle> _items;
-
-  public Subtitles(ImmutableList<Subtitle> items)
-  {
-    _items = items ?? throw new ArgumentNullException(nameof(items));
-  }
-
-  public int Count => _items.Count;
-
-  public IEnumerator<Subtitle> GetEnumerator() => ((IEnumerable<Subtitle>)_items).GetEnumerator();
-
-  IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_items).GetEnumerator();
-}
-
-public record Subtitle(int Nr, Timing Timing, ImmutableList<string> Text)
-{
-  public static Subtitle Default { get; } = new (0, Timing.Default, []);
-}
-
-public record Timing (TimeSpan Start, TimeSpan End)
-{
-  public static Timing Default { get; } = new(TimeSpan.Zero, TimeSpan.Zero);
-}

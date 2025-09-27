@@ -6,8 +6,7 @@ namespace SrtFix.Common;
 static partial class TimingParser
 {
 
-  static readonly IFormatProvider CzechCulture = System.Globalization.CultureInfo.GetCultureInfo("cs-Cz");
-  static readonly IFormatProvider InvariantCulture = System.Globalization.CultureInfo.InvariantCulture;
+
 
   [GeneratedRegex("""
         ^
@@ -58,8 +57,8 @@ static partial class TimingParser
     var s = m.Groups[groupName].Value;
     bool success;
     (success, result) = 
-         double.TryParse(s, CzechCulture, out var r)
-      || double.TryParse(s, InvariantCulture, out r) && r >= 0.0
+         double.TryParse(s, FormatProviders.Czech, out var r)
+      || double.TryParse(s, FormatProviders.Invariant, out r) && r >= 0.0
       ? (true, r) 
       : (false, default);
     return success;
