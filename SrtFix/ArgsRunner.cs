@@ -1,15 +1,12 @@
 ﻿using SrtFix.Common;
 using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace SrtFix;
 
-internal class Class2
+class ArgsRunner
 {
 
-  public static async Task RunAsync(
+  public static async Task ParseAndRunAsync(
     IReadOnlyList<string> args, CancellationToken cancellationToken = default)
   {
     RootCommand rootCommand = new("App for fixing SRT subtitles");
@@ -42,7 +39,7 @@ internal class Class2
         ops.Add(new StretchOp(stretchValue));
       }
       var file = result.GetRequiredValue(fileArgument);
-      return Class1.AaaaAsync(file, ops, cancellationToken);
+      return Executer.ExecuteAsync(file, ops, cancellationToken);
     });
     await rootCommand
       .Parse(args)

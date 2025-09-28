@@ -2,28 +2,10 @@
 
 namespace SrtFix;
 
-class Class1
+class Executer
 {
 
-  public static async Task AaaaAsync(string file, List<IOp> ops)
-  {
-    var dir = Path.GetDirectoryName(file)!;
-
-    var fileName = Path.GetFileName(file);
-    var origFileName = $"{fileName}.orig";
-    var origFile = Path.Combine(dir, origFileName);
-    if(!File.Exists(origFile))
-    {
-      File.Copy(file, origFile);
-    }
-
-    var original = await Parser.ParseAsync(origFile);
-    var result = original.Transform(ops);
-    var ser = new Serializer();
-    //await ser.WriteToFileAsync(fileName, result);
-  }
-
-  public static async Task AaaaAsync(
+  public static async Task ExecuteAsync(
     FileInfo file, List<IOp> ops, CancellationToken cancellationToken)
   {
     var dir = file.DirectoryName!;
