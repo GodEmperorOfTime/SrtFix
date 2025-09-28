@@ -37,18 +37,21 @@ public class StretchOp : IOp
 public static class OpExtensions
 {
 
-  class KompozitniOp(IReadOnlyCollection<IOp> ops) : IOp
+  //class KompozitniOp(IReadOnlyCollection<IOp> ops) : IOp
+  //{
+
+  //  readonly IReadOnlyCollection<IOp> _ops = ops ?? throw new ArgumentNullException(nameof(ops));
+
+  //  public Subtitle Transform(Subtitle subtitle) => _ops.Aggregate(subtitle, (s, o) => o.Transform(s));
+  //}
+
+  public static Subtitles Transform(this Subtitles subtitles, params List<IOp> ops)
   {
-
-    readonly IReadOnlyCollection<IOp> _ops = ops ?? throw new ArgumentNullException(nameof(ops));
-
-    public Subtitle Transform(Subtitle subtitle) => _ops.Aggregate(subtitle, (s, o) => o.Transform(s));
-  }
-
-  public static Subtitles Transform(this Subtitles subtitles, params IEnumerable<IOp> ops)
-  {
-    var komp = new KompozitniOp(ops.ToList());
-    return new(subtitles.Select(s => komp.Transform(s.WithoutNr)));
+    Subtitle transform(SubtitleNr s)
+    {
+      return ops.Aggregate(s.WithoutNr, (s, o) => o.Transform(s));
+    }
+    return new(subtitles.Select(transform));
   }
 
 }

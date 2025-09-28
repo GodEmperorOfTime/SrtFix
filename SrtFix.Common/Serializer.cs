@@ -28,6 +28,13 @@ public class Serializer
     }
   }
 
+  public async Task WriteToFileAsync(string fileName, Subtitles result)
+  {
+    using var file = File.Open(fileName, FileMode.Create);
+    using var writer = new StreamWriter(file);
+    await WriteAsync(writer, result);
+  }
+
   private string SerializeTiming(Timing timing)
   {
     var start = SerilalizeTimeStamp(timing.Start);
