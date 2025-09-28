@@ -6,10 +6,8 @@ namespace SrtFix.Common;
 static partial class TimingParser
 {
 
-
-
   [GeneratedRegex("""
-        ^
+    ^
     \s*
     (?<sHour>\d+)
     \:
@@ -39,14 +37,15 @@ static partial class TimingParser
     return success;
   }
 
-  static bool TryExtractTimestamp(Match m, string hourGroup, string minGroup, string secGroup, out TimeSpan result)
+  static bool TryExtractTimestamp(
+    Match m, string hourGroup, string minGroup, string secGroup, out TimeSpan result)
   {
     bool success;
     (success, result) = 
-      TryParseInt(m, hourGroup, out var hour)
+         TryParseInt(m, hourGroup, out var hour)
       && TryParseInt(m, minGroup, out var min)
       && TryParseDouble(m, secGroup, out var sec)
-      ? (true, new TimeSpan(hour, min, 0) + TimeSpan.FromSeconds(sec))
+      ? (true, TimeSpan.FromHours(hour) + TimeSpan.FromMinutes(min) + TimeSpan.FromSeconds(sec))
       : (false, default);
     return success;
   }
