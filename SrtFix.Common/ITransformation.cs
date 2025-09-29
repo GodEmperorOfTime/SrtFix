@@ -5,7 +5,6 @@ public interface ITransformation
   string Name { get; }
   string Description { get; }
   Subtitle Transform(Subtitle subtitle);
-
 }
 
 public class ShiftTransformation(TimeSpan shift) : ITransformation
@@ -14,7 +13,7 @@ public class ShiftTransformation(TimeSpan shift) : ITransformation
   readonly TimeSpan _shift = shift;
 
   public string Name => "shift";
-  public string Description => $"Shifts all timestamps with {_shift.TotalSeconds:N} sec";
+  public string Description => $"Shifts all timestamps by {_shift.TotalSeconds:N} sec";
 
   public Subtitle Transform(Subtitle subtitle) => subtitle with { Timing = subtitle.Timing.Add(_shift) };
 
@@ -26,7 +25,7 @@ public class ScaleTransformation(double factor) : ITransformation
   readonly double _factor = factor;
 
   public string Name => "scale";
-  public string Description => $"Multiplies all timestamps with {_factor:N6}";
+  public string Description => $"Scales all timestamps by a factor of {_factor:N6}";
 
   public Subtitle Transform(Subtitle subtitle) => subtitle with { Timing = subtitle.Timing.Multiply(_factor) };
 }

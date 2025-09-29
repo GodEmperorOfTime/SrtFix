@@ -12,12 +12,12 @@ class ArgsRunner
     RootCommand rootCommand = new("App for fixing SRT subtitles");
     Option<double> shiftOption = new("--shift")
     {
-      Description = "Shift all timestamps with given number of seconds"
+      Description = "Shift all timestamps by the given number of seconds"
     };
     rootCommand.Options.Add(shiftOption);
     Option<double> scaleOption = new("--scale")
     {
-      Description = "Multiplies all timestamps with given factor"
+      Description = "Scales (multiplies) all timestamps using the specified factor"
     };
     rootCommand.Options.Add(scaleOption);
     Argument<FileInfo> fileArgument = new("file")

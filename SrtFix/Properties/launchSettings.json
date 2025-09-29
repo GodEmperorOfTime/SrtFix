@@ -2,7 +2,7 @@
   "profiles": {
     "SrtFix": {
       "commandName": "Project",
-      "commandLineArgs": "--stretch 1,0017 \"s:\\Shared Videos\\Yellowstone\\Yellowstone.2018.S05.1080p.x265-AMBER\\Yellowstone.2018.S05E04.1080p.x265-AMBER.cs.srt\""
+      "commandLineArgs": "--scale 1,0017 \"s:\\Shared Videos\\Yellowstone\\Yellowstone.2018.S05.1080p.x265-AMBER\\Yellowstone.2018.S05E04.1080p.x265-AMBER.cs.srt\""
     }
   }
 }

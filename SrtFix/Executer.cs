@@ -15,27 +15,34 @@ class Executer
     }
     else
     {
-      Console.WriteLine($"Transformation applied to file `{file}`:");
-      EchoTransformation(transfomations);
       string origFile = GetOrigFile(file);
       var original = await Parser.ParseAsync(origFile, cancellationToken);
       var result = original.Transform(transfomations);
-      Console.WriteLine("Result preview:");
-      EchoSubtitlesPreview(result);
-
       var ser = new Serializer();
       await ser.WriteToFileAsync(file.FullName, result);
 
+      Console.WriteLine($"Transformation applied to file `{file}`:");
+      EchoTransformation(transfomations);
+      Console.WriteLine();
+      Console.WriteLine("Result preview:");
+      EchoSubtitlesPreview(result);
     }
   }
 
   private static void EchoTransformation(List<ITransformation> transfomations)
   {
-    var a = Math.Max(10, transfomations.Max(t => t.Name.Length));
-    foreach (var t in transfomations) 
+    if (transfomations.Count == 0)
     {
-      var name = t.Name.PadRight(a, ' ');
-      Console.WriteLine($"  {name} | {t.Description}");
+      Console.WriteLine("  No transformations");
+    }
+    else
+    {
+      var a = Math.Max(10, transfomations.Max(t => t.Name.Length));
+      foreach (var t in transfomations) 
+      {
+        var name = t.Name.PadRight(a, ' ');
+        Console.WriteLine($"  {name} | {t.Description}");
+      }
     }
   }
 
@@ -67,7 +74,7 @@ class Executer
     else
     {
       EchoSubtitles(result.Take(COUNT));
-      Console.WriteLine("  ...");
+      Console.WriteLine("   ...");
       EchoSubtitles(result.TakeLast(COUNT));
     }
   }
@@ -82,13 +89,22 @@ class Executer
 
   static void EchoSubtitle(SubtitleNr subtitle)
   {
+    const int MAX_LENGTH = 40;
     var text = subtitle.Text.FirstOrDefault() ?? string.Empty;
-    if(text.Length > 40)
+    if (text.Length > MAX_LENGTH)
     {
-      text = text[..40] + "...";
+      text = text[..MAX_LENGTH] + "...";
     }
+    var s = FormatTimstamp(subtitle.Timing.Start);
+    var e = FormatTimstamp(subtitle.Timing.End);
     Console.WriteLine(
-      $"  {subtitle.Nr,-4} | {subtitle.Timing.Start} | {subtitle.Timing.End} | {text}");
+      $"  {subtitle.Nr,4} | {s} | {e} | {text}");
   }
 
+  private static string FormatTimstamp(TimeSpan v)
+  {
+    var hours = (int)Math.Floor(v.TotalHours);
+    return $"{hours:D2}:{v.Minutes:D2}:{v.Seconds:D2}:{v.Milliseconds:D3}";
+    
+  }
 }
