@@ -25,7 +25,7 @@ static partial class TimingParser
     """, RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace)]
   private static partial Regex Rex();
 
-  public static bool TryParse(string s, [NotNullWhen(true)] out Timing? result)
+  public static bool TryParse(string s, out Timing result)
   {
     var m = Rex().Match(s);
     bool success;
@@ -33,7 +33,7 @@ static partial class TimingParser
       && TryExtractTimestamp(m, "sHour", "sMin", "sSec", out var start)
       && TryExtractTimestamp(m, "eHour", "eMin", "eSec", out var end)
       ? (true, new Timing(start, end))
-      : (false, null);
+      : (false, default);
     return success;
   }
 

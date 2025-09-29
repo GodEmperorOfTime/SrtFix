@@ -22,6 +22,24 @@ public class Subtitles : IReadOnlyCollection<SubtitleNr>
   private IEnumerable<SubtitleNr> NrItems => _items.Select(GetSubtitleNr);
 
   private SubtitleNr GetSubtitleNr(Subtitle source, int index) => new(index + 1, source.Timing, source.Text);
+
+  public Subtitles Sanitize()
+  {
+    var newItems =
+      from item in _items
+      let s = TimesSpanUtils.Max(item.Timing.Start, TimeSpan.Zero)
+      let e = TimesSpanUtils.Max(item.Timing.End, TimeSpan.Zero)
+      where s < e
+      let t = new Timing(s, e)
+      orderby t
+      select new Subtitle(t, item.Text);
+    return new(newItems);
+  }
+}
+
+static class TimesSpanUtils
+{
+  public static TimeSpan Max(TimeSpan l, TimeSpan r) => l > r ? l : r;
 }
 
 public record SubtitleNr(int Nr, Timing Timing, ImmutableList<string> Text)
@@ -32,10 +50,18 @@ public record SubtitleNr(int Nr, Timing Timing, ImmutableList<string> Text)
 
 public record Subtitle(Timing Timing, ImmutableList<string> Text);
 
-public record Timing(TimeSpan Start, TimeSpan End)
+public readonly record struct Timing(TimeSpan Start, TimeSpan End) 
+  : IComparable<Timing>
 {
   public static Timing Default { get; } = new(TimeSpan.Zero, TimeSpan.Zero);
 
   public Timing Add(TimeSpan value) => new(Start + value, End + value);
+
   public Timing Multiply(double value) => new(Start * value, End * value);
+
+  public int CompareTo(Timing other)
+  {
+    int r = this.Start.CompareTo(other.Start);
+    return r != 0 ? r : this.End.CompareTo(other.End);
+  }
 }

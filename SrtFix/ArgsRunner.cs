@@ -12,42 +12,38 @@ class ArgsRunner
     RootCommand rootCommand = new("App for fixing SRT subtitles");
     Option<double> shiftOption = new("--shift")
     {
-      Description = "Pocet sekund o kolik posunout cele titulky"
+      Description = "Shift all timestamps with given number of seconds"
     };
     rootCommand.Options.Add(shiftOption);
-    Option<double> stretchOption = new("--stretch")
+    Option<double> scaleOption = new("--scale")
     {
-      Description = "Koeficient, kterym znasobit vsechny casy"
+      Description = "Multiplies all timestamps with given factor"
     };
-    rootCommand.Options.Add(stretchOption);
+    rootCommand.Options.Add(scaleOption);
     Argument<FileInfo> fileArgument = new("file")
     {
-      Description = "Soubor s titulkama, ktery zpracovavat"
+      Description = "SRT file to process (fix)"
     };
     rootCommand.Arguments.Add(fileArgument);
     rootCommand.SetAction((result, cancelToken) =>
     {
-      var ops = new List<IOp>();
+      var transformations = new List<ITransformation>();
       var shiftValue = result.GetValue(shiftOption);
       if(shiftValue != 0.0)
       {
-        ops.Add(new ShiftOp(TimeSpan.FromSeconds(shiftValue)));
+        transformations.Add(new ShiftTransformation(TimeSpan.FromSeconds(shiftValue)));
       }
-      var stretchValue = result.GetValue(stretchOption);
-      if (stretchValue > 0.0)
+      var scaleValue = result.GetValue(scaleOption);
+      if (scaleValue > 0.0)
       {
-        ops.Add(new StretchOp(stretchValue));
+        transformations.Add(new ScaleTransformation(scaleValue));
       }
       var file = result.GetRequiredValue(fileArgument);
-      return Executer.ExecuteAsync(file, ops, cancellationToken);
+      return Executer.ExecuteAsync(file, transformations, cancellationToken);
     });
     await rootCommand
       .Parse(args)
       .InvokeAsync(cancellationToken: cancellationToken);
   }
-
-  //static Task RunAsync(ParseResult result, CancellationToken cancellationToken)
-  //{ 
-  //}
 
 }

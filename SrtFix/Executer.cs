@@ -6,7 +6,7 @@ class Executer
 {
 
   public static async Task ExecuteAsync(
-    FileInfo file, List<IOp> ops, CancellationToken cancellationToken)
+    FileInfo file, List<ITransformation> transfomrations, CancellationToken cancellationToken)
   {
     var dir = file.DirectoryName!;
 
@@ -18,7 +18,7 @@ class Executer
       file.CopyTo(origFile);
     }
     var original = await Parser.ParseAsync(origFile, cancellationToken);
-    var result = original.Transform(ops);
+    var result = original.Transform(transfomrations);
     var ser = new Serializer();
     await ser.WriteToFileAsync(fileName, result);
 
@@ -26,7 +26,7 @@ class Executer
     {
       EchoSubtitle(s);
     }
-    Console.WriteLine('…');
+    Console.WriteLine("...");
     foreach (var s in result.TakeLast(10))
     {
       EchoSubtitle(s);

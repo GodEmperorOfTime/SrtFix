@@ -15,7 +15,7 @@ public class Serializer
 
   public async Task WriteAsync(TextWriter writer, Subtitles content)
   {
-    foreach (var subtitle in content)
+    foreach (var subtitle in content.Sanitize())
     {
       await writer.WriteLineAsync(subtitle.Nr.ToString());
       var timingStr = SerializeTiming(subtitle.Timing);
