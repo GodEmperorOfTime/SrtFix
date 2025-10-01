@@ -10,12 +10,12 @@ class ArgsRunner
     IReadOnlyList<string> args, CancellationToken cancellationToken = default)
   {
     RootCommand rootCommand = new("App for fixing SRT subtitles");
-    Option<double> shiftOption = new("--move", "m")
+    Option<double> shiftOption = new("--move", "-m")
     {
       Description = "Move (shift) all timestamps by the given number of seconds"
     };
     rootCommand.Options.Add(shiftOption);
-    Option<double> scaleOption = new("--scale", "s")
+    Option<double> scaleOption = new("--scale", "-s")
     {
       Description = "Scales (multiplies) all timestamps using the specified factor"
     };
