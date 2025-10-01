@@ -7,13 +7,13 @@ public interface ITransformation
   Subtitle Transform(Subtitle subtitle);
 }
 
-public class ShiftTransformation(TimeSpan shift) : ITransformation
+public class MoveTransformation(TimeSpan shift) : ITransformation
 {
 
   readonly TimeSpan _shift = shift;
 
-  public string Name => "shift";
-  public string Description => $"Shifts all timestamps by {_shift.TotalSeconds:N} sec";
+  public string Name => "move";
+  public string Description => $"Moves (shifts) all timestamps by {_shift.TotalSeconds:N} sec";
 
   public Subtitle Transform(Subtitle subtitle) => subtitle with { Timing = subtitle.Timing.Add(_shift) };
 

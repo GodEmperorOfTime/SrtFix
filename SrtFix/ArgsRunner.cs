@@ -10,12 +10,12 @@ class ArgsRunner
     IReadOnlyList<string> args, CancellationToken cancellationToken = default)
   {
     RootCommand rootCommand = new("App for fixing SRT subtitles");
-    Option<double> shiftOption = new("--shift")
+    Option<double> shiftOption = new("--move", "m")
     {
-      Description = "Shift all timestamps by the given number of seconds"
+      Description = "Move (shift) all timestamps by the given number of seconds"
     };
     rootCommand.Options.Add(shiftOption);
-    Option<double> scaleOption = new("--scale")
+    Option<double> scaleOption = new("--scale", "s")
     {
       Description = "Scales (multiplies) all timestamps using the specified factor"
     };
@@ -28,10 +28,10 @@ class ArgsRunner
     rootCommand.SetAction((result, cancelToken) =>
     {
       var transformations = new List<ITransformation>();
-      var shiftValue = result.GetValue(shiftOption);
-      if(shiftValue != 0.0)
+      var moveValue = result.GetValue(shiftOption);
+      if(moveValue != 0.0)
       {
-        transformations.Add(new ShiftTransformation(TimeSpan.FromSeconds(shiftValue)));
+        transformations.Add(new MoveTransformation(TimeSpan.FromSeconds(moveValue)));
       }
       var scaleValue = result.GetValue(scaleOption);
       if (scaleValue > 0.0)
