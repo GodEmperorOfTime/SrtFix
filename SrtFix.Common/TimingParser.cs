@@ -57,8 +57,8 @@ static partial class TimingParser
     bool success;
     (success, result) = 
          double.TryParse(s, FormatProviders.Czech, out var r)
-      || double.TryParse(s, FormatProviders.Invariant, out r) && r >= 0.0
-      ? (true, r) 
+      || double.TryParse(s, FormatProviders.Invariant, out r)
+      ? (r >= 0.0, r)
       : (false, default);
     return success;
   }
